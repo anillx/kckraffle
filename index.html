@@ -73,7 +73,7 @@ pre{font:11px/1.6 var(--mono);white-space:pre-wrap;word-break:break-all;max-heig
       <p class="hint dim" id="hint"></p>
     </section>
     <section class="card">
-      <div class="head"><h2>Live chat</h2><div class="tools"><button class="btn sm" id="demo">Demo</button><span class="badge b-red" id="cbadge">DISCONNECTED</span></div></div>
+      <div class="head"><h2>Live chat</h2><div class="tools"><span class="badge b-y" id="mode" hidden>WINNERS ONLY</span><button class="btn sm" id="demo">Demo</button><span class="badge b-red" id="cbadge">DISCONNECTED</span></div></div>
       <div class="chat" id="chat"><div class="empty">Waiting for messages…</div></div>
     </section>
   </aside>
@@ -122,10 +122,11 @@ const eligible=()=>{const w=won();return S.entries.filter(n=>!w.has(lc(n)))};
 function stage(cls,html){const s=$('#stage');s.className='card stage '+cls;s.innerHTML=html}
 const idle=()=>stage('','<div class="trophy">🏆</div><h3>Ready to Draw?</h3><p class="dim">Wait for entries to fill in below, then click “Pick winner”.</p>');
 
+function chatEmpty(){$('#chat').innerHTML=`<div class="empty">${S.winners.length?'Only winners’ messages appear here.':'Waiting for messages…'}</div>`}
 async function newRound(reveal){
   if(reveal&&S.seed)S.last={commit:S.commit,seed:S.seed,client:S.client,draws:S.winners};
   S.seed=rnd(32);S.commit=await sha(S.seed);S.client=rnd(8);S.entries=[];S.winners=[];keys=new Set();
-  doSave();idle();render();
+  doSave();idle();chatEmpty();render();
 }
 
 function render(){if(dirty)return;dirty=true;requestAnimationFrame(()=>{dirty=false;paint()})}
@@ -136,7 +137,7 @@ function paint(){
   $('#hash').textContent=S.commit.slice(0,14)+'…';$('#cseed').textContent=S.client;$('#nonce').textContent='#'+(S.winners.length+1);
   $('#pick').disabled=spinning||!el.length;
   $('#entries').innerHTML=shown.length?shown.map(n=>`<span class="chip${w.has(lc(n))?' w':''}">${esc(n)}</span>`).join('')+(S.entries.length>600?`<span class="dim">+${S.entries.length-600} more</span>`:''):'<span class="dim">No entries yet.</span>';
-  $('#wins').hidden=!S.winners.length;
+  $('#wins').hidden=!S.winners.length;$('#mode').hidden=!S.winners.length;
   $('#winList').innerHTML=S.winners.map((x,i)=>`<span class="chip w">#${i+1} ${esc(x.n)}</span>`).join('');
   const live=conn==='connected'||demoT,lb=$('#live');
   lb.className='badge '+(S.paused?'b-y':live?'b-g':'b-red');lb.textContent=S.paused?'PAUSED':live?'LIVE':'OFFLINE';
@@ -147,12 +148,14 @@ function paint(){
 }
 
 function onChat(user,msg){
-  const c=$('#chat'),kw=lc((S.kw||'').trim()),hit=kw&&lc(msg.trim())===kw;
+  const kw=lc((S.kw||'').trim()),hit=kw&&lc(msg.trim())===kw;
+  if(hit&&!S.paused&&user&&!keys.has(lc(user))){keys.add(lc(user));S.entries.push(user);save();render()}
+  if(S.winners.length&&!won().has(lc(user)))return;
+  const c=$('#chat');
   if(c.querySelector('.empty'))c.innerHTML='';
-  c.insertAdjacentHTML('beforeend',`<div class="${hit?'hit':''}"><b>${esc(user)}</b> ${esc(msg)}</div>`);
+  c.insertAdjacentHTML('beforeend',`<div class="${hit&&!S.winners.length?'hit':''}"><b>${esc(user)}</b> ${esc(msg)}</div>`);
   while(c.children.length>120)c.removeChild(c.firstChild);
   c.scrollTop=c.scrollHeight;
-  if(hit&&!S.paused&&user&&!keys.has(lc(user))){keys.add(lc(user));S.entries.push(user);save();render()}
 }
 
 async function roll(names,w,nonce){
@@ -172,6 +175,7 @@ async function pick(){
   const idx=new DataView(h.buffer).getUint32(0)%names.length,w=names[idx];
   await roll(names,w,nonce);
   S.winners.push({n:w,nonce,listHash,count:names.length,idx});doSave();
+  if(S.winners.length===1)chatEmpty();
   spinning=false;render();
 }
 function proof(){
@@ -243,7 +247,7 @@ $('#pause').onclick=()=>{S.paused=!S.paused;save();render()};
 $('#reset').onclick=()=>{if(confirm('Clear all entries and winners and start a new round?'))newRound(true)};
 $('#hash').onclick=()=>{try{navigator.clipboard.writeText(S.commit)}catch(e){}};
 $('#copy').onclick=async()=>{try{await navigator.clipboard.writeText(eligible().join('\n'));$('#copy').textContent='Copied';setTimeout(()=>$('#copy').textContent='Copy',1200)}catch(e){}};
-if(S.seed){idle();render()}else newRound(false);
+chatEmpty();if(S.seed){idle();render()}else newRound(false);
 if(Q.get('ch')&&/^\d+$/.test(S.channel))setTimeout(toggleConn,300);
 setInterval(()=>{if(ws&&ws.readyState===1)ws.send('{"type":"ping"}')},240000);
 </script>
