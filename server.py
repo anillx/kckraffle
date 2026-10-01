@@ -52,6 +52,17 @@ def resolve(target):
         )
 
 
+async def send_safe(c, text):
+    """Send to one client; a slow or dead client is dropped instead of blocking everyone."""
+    try:
+        await asyncio.wait_for(c.send_str(text), 5)
+    except Exception:
+        try:
+            await c.close()
+        except Exception:
+            pass
+
+
 async def broadcast(room, obj):
     r = rooms.get(room)
     if not r:
@@ -59,11 +70,7 @@ async def broadcast(room, obj):
     if obj.get("type") == "status":
         r["state"] = obj
     text = json.dumps(obj)
-    for c in list(r["clients"]):
-        try:
-            await c.send_str(text)
-        except Exception:
-            pass
+    await asyncio.gather(*(send_safe(c, text) for c in list(r["clients"])))
 
 
 async def read_chat(room):
@@ -160,7 +167,8 @@ async def ws_handler(request):
                     leave(ws, room)
                     room = None
                 await ws.send_json({"type": "status", "state": "disconnected", "text": ""})
-            # any other message (e.g. "ping") just keeps the connection busy
+            elif kind == "ping":
+                await ws.send_json({"type": "pong"})
     finally:
         if room is not None:
             leave(ws, room)

@@ -35,6 +35,7 @@ input{width:100%;background:#070e0a;border:1px solid var(--line);border-radius:1
 .chat div{word-break:break-word}.chat b{color:var(--g)}
 .chat .hit{background:#0e2a0b;border-radius:6px;padding:2px 6px}
 .chat .empty{margin:auto;color:#3c5046}
+.emote{height:28px;width:auto;vertical-align:middle;margin:0 1px}
 .stats{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}
 .stat b{display:block;font:800 22px var(--mono);margin-top:6px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .stage{min-height:300px;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;gap:8px;border-top:2px solid var(--g)}
@@ -122,6 +123,8 @@ const eligible=()=>{const w=won();return S.entries.filter(n=>!w.has(lc(n)))};
 function stage(cls,html){const s=$('#stage');s.className='card stage '+cls;s.innerHTML=html}
 const idle=()=>stage('','<div class="trophy">🏆</div><h3>Ready to Draw?</h3><p class="dim">Wait for entries to fill in below, then click “Pick winner”.</p>');
 
+function scrollChat(){const c=$('#chat');c.scrollTop=c.scrollHeight}
+const emo=t=>esc(t).replace(/\[emote:(\d+):([^\]]+)\]/g,(_,id,n)=>`<img class="emote" src="https://files.kick.com/emotes/${id}/fullsize" alt="${n}" title="${n}" onerror="this.replaceWith(document.createTextNode(this.alt))" onload="scrollChat()">`);
 function chatEmpty(){$('#chat').innerHTML=`<div class="empty">${S.winners.length?'Only winners’ messages appear here.':'Waiting for messages…'}</div>`}
 async function newRound(reveal){
   if(reveal&&S.seed)S.last={commit:S.commit,seed:S.seed,client:S.client,draws:S.winners};
@@ -153,7 +156,7 @@ function onChat(user,msg){
   if(S.winners.length&&!won().has(lc(user)))return;
   const c=$('#chat');
   if(c.querySelector('.empty'))c.innerHTML='';
-  c.insertAdjacentHTML('beforeend',`<div class="${hit&&!S.winners.length?'hit':''}"><b>${esc(user)}</b> ${esc(msg)}</div>`);
+  c.insertAdjacentHTML('beforeend',`<div class="${hit&&!S.winners.length?'hit':''}"><b>${esc(user)}</b> ${emo(msg)}</div>`);
   while(c.children.length>120)c.removeChild(c.firstChild);
   c.scrollTop=c.scrollHeight;
 }
@@ -187,13 +190,25 @@ function proof(){
 }
 
 function setConn(c,text){conn=c;$('#hint').textContent=text||'';render()}
+let wantRelay=false,lastRx=0;
 function relay(){
   if(ws&&ws.readyState<2)return ws;
-  ws=new WebSocket((location.protocol==='https:'?'wss://':'ws://')+(location.host||'localhost:8080')+'/ws');
-  ws.onmessage=e=>{let m;try{m=JSON.parse(e.data)}catch(_){return}if(m.type==='status'){pendingId=null;setConn(m.state,m.text)}else if(m.type==='chat')onChat(m.user,m.msg)};
-  ws.onerror=()=>{if(pendingId){const id=pendingId;pendingId=null;directConnect(id)}else setConn('error','Could not reach the server.')};
-  ws.onclose=()=>{ws=null;if(conn!=='error'&&!dwant)setConn('disconnected','')};
-  return ws;
+  const w=ws=new WebSocket((location.protocol==='https:'?'wss://':'ws://')+(location.host||'localhost:8080')+'/ws');
+  w.onopen=()=>{lastRx=Date.now()};
+  w.onmessage=e=>{
+    lastRx=Date.now();
+    let m;try{m=JSON.parse(e.data)}catch(_){return}
+    if(m.type==='status'){pendingId=null;if(m.state==='connected')wantRelay=true;setConn(m.state,m.text)}
+    else if(m.type==='chat')onChat(m.user,m.msg);
+  };
+  w.onerror=()=>{if(pendingId){const id=pendingId;pendingId=null;directConnect(id)}else if(!wantRelay)setConn('error','Could not reach the server.')};
+  w.onclose=()=>{if(ws===w)ws=null;if(wantRelay&&!dwant){setConn('connecting','Reconnecting…');setTimeout(resume,3000)}else if(conn!=='error'&&!dwant)setConn('disconnected','')};
+  return w;
+}
+function resume(){
+  if(!wantRelay||dwant||(ws&&ws.readyState<2))return;
+  const w=relay(),go=()=>w.send(JSON.stringify({type:'connect',channel:S.channel}));
+  w.readyState===1?go():w.addEventListener('open',go,{once:true});
 }
 const PUSHER='wss://ws-us2.pusher.com/app/32cbd69e4b950bf97679?protocol=7&client=js&version=8.4.0-rc2&flash=false';
 let dws=null,dwant=false,pendingId=null;
@@ -220,7 +235,7 @@ function directConnect(id){
 }
 function directStop(){dwant=false;if(dws)dws.close();else setConn('disconnected','')}
 function toggleConn(){
-  if(conn==='connected'||conn==='connecting'){if(dwant)return directStop();const w=relay();if(w.readyState===1)w.send(JSON.stringify({type:'disconnect'}));return}
+  if(conn==='connected'||conn==='connecting'){if(dwant)return directStop();wantRelay=false;const w=relay();if(w.readyState===1)w.send(JSON.stringify({type:'disconnect'}));return}
   const ch=$('#ch').value.trim();if(!ch){$('#ch').focus();return}
   stopDemo();S.channel=ch;save();
   pendingId=/^\d+$/.test(ch)?ch:null;
@@ -249,7 +264,11 @@ $('#hash').onclick=()=>{try{navigator.clipboard.writeText(S.commit)}catch(e){}};
 $('#copy').onclick=async()=>{try{await navigator.clipboard.writeText(eligible().join('\n'));$('#copy').textContent='Copied';setTimeout(()=>$('#copy').textContent='Copy',1200)}catch(e){}};
 chatEmpty();if(S.seed){idle();render()}else newRound(false);
 if(Q.get('ch')&&/^\d+$/.test(S.channel))setTimeout(toggleConn,300);
-setInterval(()=>{if(ws&&ws.readyState===1)ws.send('{"type":"ping"}')},240000);
+setInterval(()=>{
+  if(!ws||ws.readyState!==1)return;
+  ws.send('{"type":"ping"}');
+  if(wantRelay&&Date.now()-lastRx>60000){const old=ws;ws=null;old.onclose=null;old.onerror=null;try{old.close()}catch(e){}setConn('connecting','Reconnecting…');resume()}
+},20000);
 </script>
 </body>
 </html>
