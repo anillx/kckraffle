@@ -91,7 +91,7 @@ pre{font:11px/1.6 var(--mono);white-space:pre-wrap;word-break:break-all;max-heig
       <p class="hint dim" id="hint"></p>
     </section>
     <section class="card">
-      <div class="head"><h2>Live chat</h2><div class="tools"><span class="badge b-y" id="mode" hidden>WINNERS ONLY</span><button class="btn sm" id="demo">Demo</button><span class="badge b-red" id="cbadge">DISCONNECTED</span></div></div>
+      <div class="head"><h2>Live chat</h2><div class="tools"><span class="badge b-y" id="mode" hidden>WINNERS ONLY</span><button class="btn sm" id="cclear" title="Clear the chat panel (entries are kept)">Clear</button><button class="btn sm" id="demo">Demo</button><span class="badge b-red" id="cbadge">DISCONNECTED</span></div></div>
       <div class="chat" id="chat"><div class="empty">Waiting for messages…</div></div>
     </section>
   </aside>
@@ -316,7 +316,7 @@ $('#wcsv').onclick=()=>{
   const url=URL.createObjectURL(new Blob([rows.map(r=>r.map(q).join(',')).join('\n')],{type:'text/csv'}));
   const a=document.createElement('a');a.href=url;a.download='winners.csv';a.click();setTimeout(()=>URL.revokeObjectURL(url),1000);
 };
-$('#conn').onclick=toggleConn;$('#demo').onclick=toggleDemo;$('#pick').onclick=pick;$('#proofBtn').onclick=proof;
+$('#conn').onclick=toggleConn;$('#demo').onclick=toggleDemo;$('#cclear').onclick=()=>chatEmpty();$('#pick').onclick=pick;$('#proofBtn').onclick=proof;
 $('#pause').onclick=()=>{S.paused=!S.paused;save();render()};
 $('#reset').onclick=()=>{if(confirm('Clear all entries and winners and start a new round?'))newRound(true)};
 $('#hash').onclick=()=>{try{navigator.clipboard.writeText(S.commit)}catch(e){}};
