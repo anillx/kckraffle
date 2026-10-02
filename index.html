@@ -3,12 +3,12 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Kick Raffle</title>
+<title>Raffle</title>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@500;700;800&family=JetBrains+Mono:wght@500;700;800&display=swap">
 <style>
-:root{--bg:#050b07;--card:#0b1410;--line:#1b2b22;--g:#53fc18;--ink:#eef5f0;--dim:#7f9388;--red:#ff5a5a;--gold:#ffd23f;--mono:"JetBrains Mono",ui-monospace,Menlo,monospace}
+:root{--gt:#a99bff;--bg:#090b14;--card:#111526;--line:#232a47;--g:#6f4cff;--ink:#eef0fb;--dim:#8a92b8;--red:#ff5a5a;--gold:#ffd23f;--mono:"JetBrains Mono",ui-monospace,Menlo,monospace}
 *{box-sizing:border-box}
-body{margin:0;min-height:100vh;color:var(--ink);font:14px/1.4 Inter,system-ui,sans-serif;background:radial-gradient(800px 420px at 0 0,#0e3b10,transparent 65%),radial-gradient(700px 380px at 100% 100%,#0a2d10,transparent 60%),var(--bg)}
+body{margin:0;min-height:100vh;color:var(--ink);font:14px/1.4 Inter,system-ui,sans-serif;background:radial-gradient(800px 420px at 0 0,#1d1650,transparent 65%),radial-gradient(700px 380px at 100% 100%,#15123f,transparent 60%),var(--bg)}
 .app{display:grid;grid-template-columns:380px minmax(0,1fr);gap:18px;max-width:1320px;margin:0 auto;padding:24px}
 .col{display:flex;flex-direction:column;gap:14px;min-width:0}
 .card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:16px}
@@ -17,41 +17,54 @@ body{margin:0;min-height:100vh;color:var(--ink);font:14px/1.4 Inter,system-ui,sa
 .dim{color:var(--dim)}
 h2{margin:0;font:800 13px var(--mono);letter-spacing:.05em;text-transform:uppercase}
 .setup h2{margin-bottom:14px}
-.k{display:inline-grid;place-items:center;width:22px;height:22px;background:var(--g);color:#061006;border-radius:5px;margin-right:8px;font-weight:900}
-input{width:100%;background:#070e0a;border:1px solid var(--line);border-radius:10px;padding:12px;color:var(--ink);font:700 14px var(--mono);margin:6px 0 14px}
-.btn{width:100%;border:0;border-radius:10px;padding:13px;background:var(--g);color:#061006;font:800 12px var(--mono);letter-spacing:.1em;cursor:pointer}
-.btn.off{background:transparent;color:var(--g);border:1px solid var(--g)}
+.k{display:inline-grid;place-items:center;width:22px;height:22px;background:var(--g);color:#ffffff;border-radius:5px;margin-right:8px;font-weight:900}
+input{width:100%;background:#0a0d1a;border:1px solid var(--line);border-radius:10px;padding:12px;color:var(--ink);font:700 14px var(--mono);margin:6px 0 14px}
+.btn{width:100%;border:0;border-radius:10px;padding:13px;background:var(--g);color:#ffffff;font:800 12px var(--mono);letter-spacing:.1em;cursor:pointer}
+.btn.off{background:transparent;color:var(--gt);border:1px solid var(--g)}
 .btn:disabled{opacity:.35;cursor:not-allowed}
-.btn.sm{width:auto;padding:6px 10px;font-size:10px;letter-spacing:.05em;background:#111d17;color:var(--dim);border:1px solid var(--line)}
+.btn.sm{width:auto;padding:6px 10px;font-size:10px;letter-spacing:.05em;background:#1a2040;color:var(--dim);border:1px solid var(--line)}
 :focus-visible{outline:2px solid var(--g);outline-offset:2px}
 .hint{margin:10px 0 0;font-size:12px;min-height:16px}
 .head{display:flex;justify-content:space-between;align-items:center;gap:8px;margin-bottom:12px}
 .tools{display:flex;gap:6px;align-items:center}
 .badge{font:700 10px var(--mono);padding:4px 8px;border-radius:6px;border:1px solid}
 .b-red{color:var(--red);border-color:#5a2222;background:#2a1111}
-.b-g{color:var(--g);border-color:#1f5a14;background:#0e2a0b}
+.b-g{color:var(--gt);border-color:#3b2f8f;background:#1e1a4d}
 .b-y{color:var(--gold);border-color:#5a4a14;background:#2a2208}
 .chat{height:380px;overflow:auto;display:flex;flex-direction:column;gap:4px;font-size:13px}
-.chat div{word-break:break-word}.chat b{color:var(--g)}
-.chat .hit{background:#0e2a0b;border-radius:6px;padding:2px 6px}
-.chat .empty{margin:auto;color:#3c5046}
+.chat div{word-break:break-word}.chat b{color:var(--gt)}
+.chat .hit{background:#1e1a4d;border-radius:6px;padding:2px 6px}
+.chat .empty{margin:auto;color:#454c73}
+.prize{margin:0;font:700 18px Inter;color:var(--gold)}
+.chip.r{opacity:.4;text-decoration:line-through}
+#entries .chip{cursor:pointer}
+.chip button.x{background:none;border:0;color:inherit;cursor:pointer;font-size:12px;margin-left:6px;padding:0 2px}
 .emote{height:28px;width:auto;vertical-align:middle;margin:0 1px}
 .stats{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}
 .stat b{display:block;font:800 22px var(--mono);margin-top:6px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.stage{min-height:300px;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;gap:8px;border-top:2px solid var(--g)}
-.stage.win{box-shadow:0 0 0 2px var(--g),0 0 50px rgba(83,252,24,.25)}
+.stage{position:relative;overflow:hidden;min-height:300px;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;gap:8px;border-top:2px solid var(--g)}
+.stage.win{box-shadow:0 0 0 2px var(--gold),0 0 50px rgba(255,210,63,.25)}
 .stage h3{margin:8px 0 0;font:800 26px Inter}.stage p{margin:0}
-.trophy{width:84px;height:84px;border-radius:50%;background:#111b16;border:1px solid var(--line);display:grid;place-items:center;font-size:36px}
+.trophy{width:84px;height:84px;border-radius:50%;background:#171c36;border:1px solid var(--line);display:grid;place-items:center;font-size:36px}
 .big{font:800 clamp(32px,6vw,64px) Inter;letter-spacing:-.03em;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.big.g{color:var(--g)}
+.reel{width:100%;height:216px;overflow:hidden;position:relative;-webkit-mask-image:linear-gradient(transparent,#000 30%,#000 70%,transparent);mask-image:linear-gradient(transparent,#000 30%,#000 70%,transparent)}
+.reel::before{content:"";position:absolute;left:8%;right:8%;top:72px;height:72px;border-top:2px solid var(--g);border-bottom:2px solid var(--g);background:rgba(127,127,127,.12);pointer-events:none}
+.strip{will-change:transform}
+.strip div{height:72px;display:flex;align-items:center;justify-content:center;font:800 40px Inter;letter-spacing:-.02em;white-space:nowrap;overflow:hidden;padding:0 16px}
+.stage.win .big{color:var(--gold);animation:pop .55s cubic-bezier(.2,.9,.3,1.3)}
+@keyframes pop{0%{transform:scale(.5);opacity:0}100%{transform:scale(1);opacity:1}}
+.cf{position:absolute;inset:0;width:100%;height:100%;pointer-events:none}
+.trophy{color:var(--gold)}
+.tag{background:var(--gold);color:#201800;font:800 12px var(--mono);letter-spacing:.12em;text-transform:uppercase;padding:5px 14px;border-radius:999px}
+.big.g{color:var(--gt)}
 .fair{display:flex;gap:10px;align-items:center;flex-wrap:wrap;font:11px var(--mono);color:var(--dim);padding:10px 14px}
-.fair code{background:#070e0a;border:1px solid var(--line);border-radius:6px;padding:5px 9px;color:var(--ink);cursor:pointer}
+.fair code{background:#0a0d1a;border:1px solid var(--line);border-radius:6px;padding:5px 9px;color:var(--ink);cursor:pointer}
 .sp{flex:1}
 .row{display:flex;gap:10px}
 #pick{flex:1;padding:18px;font-size:15px}
 #reset{width:96px;background:#2a1212;color:var(--red);border:1px solid #4a1f1f}
 .chips{display:flex;flex-wrap:wrap;gap:6px;max-height:260px;overflow:auto}
-.chip{background:#070e0a;border:1px solid var(--line);border-radius:999px;padding:3px 10px;font-size:12px}
+.chip{background:#0a0d1a;border:1px solid var(--line);border-radius:999px;padding:3px 10px;font-size:12px}
 .chip.w{background:var(--gold);color:#201800;border-color:var(--gold)}
 dialog{background:var(--card);color:var(--ink);border:1px solid var(--line);border-radius:14px;max-width:680px;width:92vw}
 dialog::backdrop{background:#000a}
@@ -64,12 +77,16 @@ pre{font:11px/1.6 var(--mono);white-space:pre-wrap;word-break:break-all;max-heig
 <div class="app">
   <aside class="col">
     <section class="card setup">
-      <h2><span class="k">K</span>Connection setup</h2>
+      <h2><span class="k">🎟</span>Connection setup</h2>
       <label class="lbl" for="ch">Kick channel name</label>
       <input id="ch" type="text" placeholder="Channel name or chatroom ID" autocomplete="off">
       <p class="dim" style="margin:-8px 0 14px;font-size:12px">Type the channel name, or the chatroom ID number if the name lookup fails. Find the ID at kick.com/api/v2/channels/NAME, under "chatroom" then "id".</p>
       <label class="lbl" for="kw">Entry keyword</label>
       <input id="kw" type="text" value="!join" autocomplete="off">
+      <label class="lbl" for="prize">Prize (optional)</label>
+      <input id="prize" type="text" placeholder="e.g. Steam gift card" autocomplete="off">
+      <label class="lbl" for="excl">Excluded names (comma separated)</label>
+      <input id="excl" type="text" placeholder="bots, streamer account" autocomplete="off">
       <button class="btn" id="conn">CONNECT TO CHAT</button>
       <p class="hint dim" id="hint"></p>
     </section>
@@ -93,7 +110,7 @@ pre{font:11px/1.6 var(--mono);white-space:pre-wrap;word-break:break-all;max-heig
     </section>
     <div class="row"><button class="btn" id="pick">PICK WINNER</button><button class="btn" id="reset" title="Clear entries and winners, start a new round">RESET</button></div>
     <section class="card" id="wins" hidden>
-      <div class="head"><h2>Winners</h2></div><div class="chips" id="winList"></div>
+      <div class="head"><h2>Winners</h2><div class="tools"><button class="btn sm" id="wcopy">Copy</button><button class="btn sm" id="wcsv">CSV</button></div></div><div class="chips" id="winList"></div>
     </section>
     <section class="card">
       <div class="head"><h2>Entries</h2><div class="tools"><button class="btn sm" id="pause">Pause</button><button class="btn sm" id="copy">Copy</button><span class="badge b-red" id="live">OFFLINE</span></div></div>
@@ -111,24 +128,30 @@ const esc=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;'
 const lc=s=>s.toLowerCase(),sleep=ms=>new Promise(r=>setTimeout(r,ms));
 async function hmac(k,m){const key=await crypto.subtle.importKey('raw',enc.encode(k),{name:'HMAC',hash:'SHA-256'},false,['sign']);return new Uint8Array(await crypto.subtle.sign('HMAC',key,enc.encode(m)))}
 
-let S={channel:'',kw:'!join',entries:[],winners:[],paused:false,seed:'',commit:'',client:'',last:null};
+let S={channel:'',kw:'!join',prize:'',exclude:'nightbot, streamelements',removed:[],entries:[],winners:[],paused:false,seed:'',commit:'',client:'',last:null};
 let keys=new Set(),spinning=false,conn='disconnected',demoT=null,ws=null,dirty=false,st;
 try{Object.assign(S,JSON.parse(localStorage.getItem(KEY)||'{}'))}catch(e){}
 const doSave=()=>{try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){}};
 const save=()=>{clearTimeout(st);st=setTimeout(doSave,300)};
 addEventListener('beforeunload',doSave);
-const won=()=>new Set(S.winners.map(w=>lc(w.n)));
-const eligible=()=>{const w=won();return S.entries.filter(n=>!w.has(lc(n)))};
+const live=()=>S.winners.filter(w=>!w.void);
+const won=()=>new Set(live().map(w=>lc(w.n)));
+let exSet=new Set();
+const setEx=()=>{exSet=new Set((S.exclude||'').split(',').map(x=>lc(x.trim())).filter(Boolean))};
+const out=n=>exSet.has(lc(n))||S.removed.some(x=>lc(x)===lc(n));
+const eligible=()=>{const w=won();return S.entries.filter(n=>!w.has(lc(n))&&!out(n))};
 
 function stage(cls,html){const s=$('#stage');s.className='card stage '+cls;s.innerHTML=html}
-const idle=()=>stage('','<div class="trophy">🏆</div><h3>Ready to Draw?</h3><p class="dim">Wait for entries to fill in below, then click “Pick winner”.</p>');
+const CROWN='<svg viewBox="0 0 24 24" width="40" height="40" fill="currentColor" aria-hidden="true"><path d="M3 6l5 4 4-7 4 7 5-4-2 11H5L3 6zm2 13h14v2H5v-2z"/></svg>';
+const prizeLine=()=>S.prize?`<p class="prize">🎁 ${esc(S.prize)}</p>`:'';
+const idle=()=>stage('',`<div class="trophy">${CROWN}</div><h3>Ready to Draw?</h3><p class="dim">Wait for entries to fill in below, then click “Pick winner”.</p>${prizeLine()}`);
 
 function scrollChat(){const c=$('#chat');c.scrollTop=c.scrollHeight}
 const emo=t=>esc(t).replace(/\[emote:(\d+):([^\]]+)\]/g,(_,id,n)=>`<img class="emote" src="https://files.kick.com/emotes/${id}/fullsize" alt="${n}" title="${n}" onerror="this.replaceWith(document.createTextNode(this.alt))" onload="scrollChat()">`);
-function chatEmpty(){$('#chat').innerHTML=`<div class="empty">${S.winners.length?'Only winners’ messages appear here.':'Waiting for messages…'}</div>`}
+function chatEmpty(){$('#chat').innerHTML=`<div class="empty">${live().length?'Only winners’ messages appear here.':'Waiting for messages…'}</div>`}
 async function newRound(reveal){
   if(reveal&&S.seed)S.last={commit:S.commit,seed:S.seed,client:S.client,draws:S.winners};
-  S.seed=rnd(32);S.commit=await sha(S.seed);S.client=rnd(8);S.entries=[];S.winners=[];keys=new Set();
+  S.seed=rnd(32);S.commit=await sha(S.seed);S.client=rnd(8);S.entries=[];S.winners=[];S.removed=[];keys=new Set();
   doSave();idle();chatEmpty();render();
 }
 
@@ -136,14 +159,14 @@ function render(){if(dirty)return;dirty=true;requestAnimationFrame(()=>{dirty=fa
 function paint(){
   const el=eligible(),w=won(),shown=S.entries.slice(0,600);
   $('#sEntries').textContent=S.entries.length;$('#sElig').textContent=el.length;
-  $('#sKw').textContent=S.kw||'-';$('#sWin').textContent=S.winners.length;
+  $('#sKw').textContent=S.kw||'-';$('#sWin').textContent=live().length;
   $('#hash').textContent=S.commit.slice(0,14)+'…';$('#cseed').textContent=S.client;$('#nonce').textContent='#'+(S.winners.length+1);
-  $('#pick').disabled=spinning||!el.length;
-  $('#entries').innerHTML=shown.length?shown.map(n=>`<span class="chip${w.has(lc(n))?' w':''}">${esc(n)}</span>`).join('')+(S.entries.length>600?`<span class="dim">+${S.entries.length-600} more</span>`:''):'<span class="dim">No entries yet.</span>';
-  $('#wins').hidden=!S.winners.length;$('#mode').hidden=!S.winners.length;
-  $('#winList').innerHTML=S.winners.map((x,i)=>`<span class="chip w">#${i+1} ${esc(x.n)}</span>`).join('');
-  const live=conn==='connected'||demoT,lb=$('#live');
-  lb.className='badge '+(S.paused?'b-y':live?'b-g':'b-red');lb.textContent=S.paused?'PAUSED':live?'LIVE':'OFFLINE';
+  $('#pick').disabled=spinning||!el.length;$('#pick').textContent=spinning?'DRAWING…':'PICK WINNER';
+  $('#entries').innerHTML=shown.length?shown.map(n=>`<span class="chip${w.has(lc(n))?' w':out(n)?' r':''}" data-n="${esc(n)}">${esc(n)}</span>`).join('')+(S.entries.length>600?`<span class="dim">+${S.entries.length-600} more</span>`:''):'<span class="dim">No entries yet.</span>';
+  $('#wins').hidden=!live().length;$('#mode').hidden=!live().length;
+  $('#winList').innerHTML=S.winners.map((x,i)=>x.void?'':`<span class="chip w">#${x.nonce} ${esc(x.n)}<button class="x" data-i="${i}" title="Disqualify and draw the next winner">✕</button></span>`).join('');
+  const on=conn==='connected'||demoT,lb=$('#live');
+  lb.className='badge '+(S.paused?'b-y':on?'b-g':'b-red');lb.textContent=S.paused?'PAUSED':on?'LIVE':'OFFLINE';
   $('#pause').textContent=S.paused?'Resume':'Pause';
   const cb=$('#cbadge');cb.className='badge '+(conn==='connected'?'b-g':conn==='connecting'?'b-y':'b-red');cb.textContent=conn.toUpperCase();
   const busy=conn==='connected'||conn==='connecting';
@@ -152,22 +175,38 @@ function paint(){
 
 function onChat(user,msg){
   const kw=lc((S.kw||'').trim()),hit=kw&&lc(msg.trim())===kw;
-  if(hit&&!S.paused&&user&&!keys.has(lc(user))){keys.add(lc(user));S.entries.push(user);save();render()}
-  if(S.winners.length&&!won().has(lc(user)))return;
+  if(hit&&!S.paused&&user&&!exSet.has(lc(user))&&!keys.has(lc(user))){keys.add(lc(user));S.entries.push(user);save();render()}
+  if(live().length&&!won().has(lc(user)))return;
   const c=$('#chat');
   if(c.querySelector('.empty'))c.innerHTML='';
-  c.insertAdjacentHTML('beforeend',`<div class="${hit&&!S.winners.length?'hit':''}"><b>${esc(user)}</b> ${emo(msg)}</div>`);
+  c.insertAdjacentHTML('beforeend',`<div class="${hit&&!live().length?'hit':''}"><b>${esc(user)}</b> ${emo(msg)}</div>`);
   while(c.children.length>120)c.removeChild(c.firstChild);
   c.scrollTop=c.scrollHeight;
 }
 
 async function roll(names,w,nonce){
-  const steps=matchMedia('(prefers-reduced-motion:reduce)').matches?1:28;
-  for(let i=0;i<steps;i++){
-    stage('',`<div class="big g">${esc(names[Math.floor(Math.random()*names.length)])}</div>`);
-    await sleep(40+i*i/4);
-  }
-  stage('win',`<div class="trophy">🏆</div><p class="lbl">Winner #${nonce}</p><div class="big">${esc(w)}</div>`);
+  const fast=matchMedia('(prefers-reduced-motion:reduce)').matches,H=72,N=38,n=live().length+1;
+  const rp=()=>names[Math.floor(Math.random()*names.length)];
+  const items=[];for(let i=0;i<N+2;i++)items.push(rp());items[N]=w;
+  stage('spin',`<p class="lbl">Drawing winner #${n}</p><div class="reel"><div class="strip" id="strip">${items.map(x=>`<div>${esc(x)}</div>`).join('')}</div></div><p class="dim">${names.length} in the draw</p>${prizeLine()}`);
+  const st=$('#strip');st.style.transform='translateY(0)';st.getBoundingClientRect();
+  st.style.transition=fast?'none':'transform 4.4s cubic-bezier(.12,.7,.1,1)';
+  st.style.transform=`translateY(${-(N-1)*H}px)`;
+  await sleep(fast?100:4600);
+  stage('win',`<div class="trophy">${CROWN}</div><span class="tag">Winner #${n}</span><div class="big">${esc(w)}</div>${prizeLine()}<canvas id="cf" class="cf"></canvas>`);
+  if(!fast)confetti();
+}
+function confetti(){
+  const c=$('#cf'),x=c&&c.getContext&&c.getContext('2d');if(!x)return;
+  c.width=c.offsetWidth;c.height=c.offsetHeight;
+  const cols=['#ffd23f','#ffffff',getComputedStyle(document.documentElement).getPropertyValue('--g').trim()||'#6f4cff','#ff5d9e'];
+  const P=Array.from({length:120},()=>({x:c.width/2,y:c.height*.45,vx:(Math.random()-.5)*15,vy:-Math.random()*13-3,r:Math.random()*6+3,col:cols[Math.floor(Math.random()*cols.length)],a:Math.random()*6,va:(Math.random()-.5)*.3}));
+  let t=0;
+  (function f(){
+    t++;x.clearRect(0,0,c.width,c.height);
+    P.forEach(q=>{q.x+=q.vx;q.y+=q.vy;q.vy+=.35;q.vx*=.99;q.a+=q.va;x.save();x.translate(q.x,q.y);x.rotate(q.a);x.fillStyle=q.col;x.fillRect(-q.r/2,-q.r/2,q.r,q.r*.6);x.restore()});
+    if(t<150&&$('#cf')===c)requestAnimationFrame(f);else x.clearRect(0,0,c.width,c.height);
+  })();
 }
 async function pick(){
   const el=eligible();if(spinning||!el.length)return;
@@ -177,12 +216,12 @@ async function pick(){
   const h=await hmac(S.seed,`${S.client}:${nonce}:${listHash}`);
   const idx=new DataView(h.buffer).getUint32(0)%names.length,w=names[idx];
   await roll(names,w,nonce);
-  S.winners.push({n:w,nonce,listHash,count:names.length,idx});doSave();
-  if(S.winners.length===1)chatEmpty();
+  S.winners.push({n:w,nonce,listHash,count:names.length,idx,prize:S.prize,t:Date.now()});doSave();
+  if(live().length===1)chatEmpty();
   spinning=false;render();
 }
 function proof(){
-  const fmt=a=>a.map(x=>`#${x.nonce} ${x.n}  list ${x.listHash.slice(0,16)}…  ${x.count} eligible, index ${x.idx}`).join('\n')||'none';
+  const fmt=a=>a.map(x=>`#${x.nonce} ${x.n}${x.void?' [VOIDED]':''}  list ${x.listHash.slice(0,16)}…  ${x.count} eligible, index ${x.idx}`).join('\n')||'none';
   let t=`CURRENT ROUND\nCommitment (SHA-256 of server seed): ${S.commit}\nClient seed: ${S.client}\nDraws:\n${fmt(S.winners)}\n`;
   if(S.last)t+=`\nPREVIOUS ROUND (seed revealed)\nServer seed: ${S.last.seed}\nCommitment: ${S.last.commit}\nClient seed: ${S.last.client}\nDraws:\n${fmt(S.last.draws)}\n`;
   t+='\nHOW TO VERIFY\nlist = eligible names, lowercase, sorted, joined with commas; listHash = SHA-256(list)\nindex = first 4 bytes of HMAC-SHA256(serverSeed, "clientSeed:nonce:listHash") as a number, mod eligible count\nCommitment must equal SHA-256(serverSeed). The seed is revealed when the round is reset.';
@@ -254,14 +293,34 @@ function toggleDemo(){
 
 const Q=new URLSearchParams(location.search);
 if(Q.get('ch'))S.channel=Q.get('ch');if(Q.get('kw'))S.kw=Q.get('kw');
-$('#ch').value=S.channel;$('#kw').value=S.kw;keys=new Set(S.entries.map(lc));
+$('#ch').value=S.channel;$('#kw').value=S.kw;$('#prize').value=S.prize;$('#excl').value=S.exclude;setEx();keys=new Set(S.entries.concat(S.removed).map(lc));
 $('#ch').oninput=e=>{S.channel=e.target.value;save()};
 $('#kw').oninput=e=>{S.kw=e.target.value;save();render()};
+$('#prize').oninput=e=>{S.prize=e.target.value;save()};
+$('#prize').onchange=()=>{if(!spinning&&!live().length)idle()};
+$('#excl').oninput=e=>{S.exclude=e.target.value;setEx();save();render()};
+$('#entries').onclick=e=>{
+  const c=e.target.closest('.chip');if(!c||!c.dataset.n)return;
+  const n=c.dataset.n;if(won().has(lc(n))||out(n))return;
+  if(confirm('Remove '+n+' from the raffle? They will not be able to rejoin this round.')){S.removed.push(n);save();render()}
+};
+$('#winList').onclick=e=>{
+  const b=e.target.closest('.x');if(!b||spinning)return;
+  const w=S.winners[+b.dataset.i];if(!w)return;
+  if(confirm('Disqualify '+w.n+' and draw the next winner?')){w.void=true;S.removed.push(w.n);doSave();idle();chatEmpty();render();pick()}
+};
+$('#wcopy').onclick=async()=>{try{await navigator.clipboard.writeText(live().map((w,i)=>`${i+1}. ${w.n}${w.prize?' - '+w.prize:''}`).join('\n'));$('#wcopy').textContent='Copied';setTimeout(()=>$('#wcopy').textContent='Copy',1200)}catch(e){}};
+$('#wcsv').onclick=()=>{
+  const q=v=>'"'+String(v).replace(/"/g,'""')+'"';
+  const rows=[['nonce','winner','prize','time'],...live().map(w=>[w.nonce,w.n,w.prize||'',w.t?new Date(w.t).toISOString():''])];
+  const url=URL.createObjectURL(new Blob([rows.map(r=>r.map(q).join(',')).join('\n')],{type:'text/csv'}));
+  const a=document.createElement('a');a.href=url;a.download='winners.csv';a.click();setTimeout(()=>URL.revokeObjectURL(url),1000);
+};
 $('#conn').onclick=toggleConn;$('#demo').onclick=toggleDemo;$('#pick').onclick=pick;$('#proofBtn').onclick=proof;
 $('#pause').onclick=()=>{S.paused=!S.paused;save();render()};
 $('#reset').onclick=()=>{if(confirm('Clear all entries and winners and start a new round?'))newRound(true)};
 $('#hash').onclick=()=>{try{navigator.clipboard.writeText(S.commit)}catch(e){}};
-$('#copy').onclick=async()=>{try{await navigator.clipboard.writeText(eligible().join('\n'));$('#copy').textContent='Copied';setTimeout(()=>$('#copy').textContent='Copy',1200)}catch(e){}};
+$('#copy').onclick=async()=>{try{await navigator.clipboard.writeText(S.entries.join('\n'));$('#copy').textContent='Copied';setTimeout(()=>$('#copy').textContent='Copy',1200)}catch(e){}};
 chatEmpty();if(S.seed){idle();render()}else newRound(false);
 if(Q.get('ch')&&/^\d+$/.test(S.channel))setTimeout(toggleConn,300);
 setInterval(()=>{
