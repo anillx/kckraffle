@@ -50,7 +50,7 @@ body:before{
 .lbl{font:800 10px var(--mono);letter-spacing:.1em;text-transform:uppercase;color:var(--dim)}
 .dim{color:var(--dim)}
 h2{margin:0;font:800 12px var(--mono);letter-spacing:.08em;text-transform:uppercase}
-.setup h2{display:flex;width:fit-content;align-items:center;gap:10px;margin-bottom:18px;padding:6px 14px 6px 6px;border:1px solid var(--line2);border-radius:12px;background:rgba(9,13,25,.7)}
+.setup h2{display:flex;align-items:center;gap:10px;margin-bottom:18px}
 .setup h2 .k{margin-right:0}
 .k{
   display:inline-grid;place-items:center;width:24px;height:24px;
@@ -101,6 +101,7 @@ input:focus{outline:none;border-color:var(--g);box-shadow:0 0 0 3px rgba(139,92,
 .prize{margin:0;font:800 16px Inter;color:var(--gold)}
 .chip.r{opacity:.42;text-decoration:line-through}
 #entries .chip{cursor:pointer}
+.chip button.del{display:inline-flex;vertical-align:-2px}
 .chip button.x{background:none;border:0;color:inherit;cursor:pointer;font-size:11px;margin-left:6px;padding:0 2px}
 .emote{height:25px;width:auto;vertical-align:middle;margin:0 1px}
 .stats{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-top:2px}
@@ -236,6 +237,31 @@ pre{font:11px/1.65 var(--mono);white-space:pre-wrap;word-break:break-all;max-hei
   .logo{width:40px;height:40px}
 }
 
+/* Footer */
+.foot{margin-top:18px;border-top:1px solid var(--line);background:linear-gradient(180deg,rgba(9,12,24,0),rgba(7,9,18,.9))}
+.foot-in{max-width:1480px;margin:0 auto;padding:22px}
+.foot-top{display:flex;justify-content:space-between;align-items:center;gap:16px;flex-wrap:wrap}
+.fb{display:flex;align-items:center;gap:12px}
+.fb b{font:900 15px Inter;font-style:italic;letter-spacing:-.02em}
+.fb .beta{margin-left:8px}
+.fb p{margin:3px 0 0;font-size:12px;color:var(--dim)}
+.logo.sm{width:36px;height:36px;border-radius:10px}
+.totop{padding:8px 12px;border:1px solid var(--line2);border-radius:10px;color:var(--dim);font:700 12px var(--mono);text-decoration:none}
+.totop:hover{color:var(--ink)}
+.fine{max-width:900px;margin:14px 0 0;font-size:11.5px;line-height:1.55;color:var(--muted)}
+.fine+.fine{margin-top:6px}
+
+/* User history */
+.chat b[data-u],.un{cursor:pointer}
+.chat b[data-u]:hover,.un:hover{text-decoration:underline}
+#udlg{padding:0;width:min(560px,94vw)}
+.uh{display:flex;align-items:center;gap:10px;flex-wrap:wrap;padding:14px 16px;border-bottom:1px solid var(--line2)}
+.uh .nm{font:900 19px Inter;letter-spacing:-.02em}
+.ul{max-height:52vh;overflow:auto;padding:10px 16px;display:flex;flex-direction:column;gap:7px;font-size:13px}
+.ul>div{display:flex;gap:10px;word-break:break-word}
+.ul time{flex:none;padding-top:2px;font:11px var(--mono);color:var(--muted)}
+.uf{display:flex;justify-content:space-between;gap:8px;margin:0;padding:12px 16px;border-top:1px solid var(--line2)}
+
 /* V2.1 readability */
 #entries .chip{
   font-size:14px;
@@ -312,7 +338,20 @@ pre{font:11px/1.65 var(--mono);white-space:pre-wrap;word-break:break-all;max-hei
     </section>
   </main>
 </div>
+<footer class="foot"><div class="foot-in">
+  <div class="foot-top">
+    <div class="fb"><span class="logo sm"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 9a2 2 0 0 0 0 6v3a1 1 0 0 0 1 1h16a1 1 0 0 0 1-1v-3a2 2 0 0 0 0-6V6a1 1 0 0 0-1-1H4a1 1 0 0 0-1 1z"/><path d="M13 5v2M13 11v2M13 17v2"/></svg></span><div><b>KCK RAFFLE</b><em class="beta">BETA</em><p>Chat giveaway draws for streamers.</p></div></div>
+    <a class="totop" href="#top">Back to top</a>
+  </div>
+  <p class="fine">Every draw starts from a published commitment, so anyone can check it afterwards (see Proof). KCK Raffle isn't affiliated with or endorsed by Kick. Streamers are responsible for running giveaways in line with Kick's rules and the laws where they live.</p>
+  <p class="fine">© <span id="yr">2026</span> KCK Raffle · Beta, features may change.</p>
+</div></footer>
 <dialog id="dlg"><pre id="proofTxt"></pre><form method="dialog"><button class="btn sm">Close</button></form></dialog>
+<dialog id="udlg" aria-labelledby="uName">
+  <div class="uh"><span class="nm" id="uName"></span><span class="badge" id="uStat"></span><span class="dim" id="uCount" style="font-size:12px"></span></div>
+  <div class="ul" id="ul"></div>
+  <form method="dialog" class="uf"><button type="button" class="btn sm" id="uMode">Show all</button><button class="btn sm">Close</button></form>
+</dialog>
 <script>
 const $=s=>document.querySelector(s),enc=new TextEncoder(),KEY='kickraffle.v1';
 const hex=b=>[...new Uint8Array(b)].map(x=>x.toString(16).padStart(2,'0')).join('');
@@ -362,7 +401,7 @@ function paint(){
   $('#pick').disabled=spinning||!el.length;$('#pick').textContent=spinning?'DRAWING…':'PICK WINNER';
   $('#entries').innerHTML=shown.length?shown.map(n=>`<span class="chip${w.has(lc(n))?' w':out(n)?' r':''}" data-n="${esc(n)}">${esc(n)}</span>`).join('')+(S.entries.length>600?`<span class="dim">+${S.entries.length-600} more</span>`:''):'<span class="dim">No entries yet.</span>';
   $('#wins').hidden=!live().length;$('#mode').hidden=!live().length;
-  $('#winList').innerHTML=S.winners.map((x,i)=>x.void?'':`<span class="chip w">${esc(x.n)}<button class="x" data-i="${i}" title="Disqualify and draw the next winner">✕</button></span>`).join('');
+  $('#winList').innerHTML=S.winners.map((x,i)=>x.void?'':`<span class="chip w"><span class="un" role="button" tabindex="0" data-u="${esc(x.n)}">${esc(x.n)}</span><button class="x del" data-i="${i}" title="Remove this winner (they can be drawn again)" aria-label="Remove winner ${esc(x.n)}"><svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 7h16M10 11v6M14 11v6M5 7l1 12a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2l1-12M9 7V4h6v3"/></svg></button><button class="x" data-i="${i}" title="Disqualify and draw the next winner" aria-label="Disqualify ${esc(x.n)}">✕</button></span>`).join('');
   const on=conn==='connected'||demoT,lb=$('#live');
   lb.className='badge '+(S.paused?'b-y':on?'b-g':'b-red');lb.textContent=S.paused?'PAUSED':on?'LIVE':'OFFLINE';
   $('#pause').textContent=S.paused?'Resume':'Pause';
@@ -372,13 +411,39 @@ function paint(){
   $('#conn').textContent=busy?'DISCONNECT':'CONNECT TO CHAT';$('#conn').className='btn'+(busy?' off':'');
 }
 
-function onChat(user,msg){
+const LOGKEY='kickraffle.log.v1',LOGMAX=5000;
+let LOG=[],logT,uOpen=null,uAll=false;
+try{const d=JSON.parse(localStorage.getItem(LOGKEY)||'[]'),cut=Date.now()-864e5;LOG=Array.isArray(d)?d.filter(x=>x&&x.t>cut):[]}catch(e){}
+const saveLog=()=>{clearTimeout(logT);logT=setTimeout(()=>{try{localStorage.setItem(LOGKEY,JSON.stringify(LOG.filter(x=>!x.d)))}catch(e){}},3000)};
+function record(user,msg,demo){
+  if(!user)return;
+  LOG.push({u:lc(user),n:user,t:Date.now(),m:msg,d:demo?1:0});
+  if(LOG.length>LOGMAX+500)LOG.splice(0,LOG.length-LOGMAX);
+  saveLog();
+  if(uOpen&&lc(user)===uOpen)showUser(uOpen);
+}
+function showUser(u,reset){
+  if(reset)uAll=false;
+  uOpen=lc(u);
+  const msgs=LOG.filter(x=>x.u===uOpen),name=msgs.length?msgs[msgs.length-1].n:u;
+  const st=won().has(uOpen)?['WINNER','b-y']:out(name)?['EXCLUDED','b-red']:keys.has(uOpen)?['ENTERED','b-g']:['NOT ENTERED','b-red'];
+  const list=uAll?msgs:msgs.slice(-10);
+  $('#uName').textContent=name;
+  const b=$('#uStat');b.textContent=st[0];b.className='badge '+st[1];
+  $('#uCount').textContent=msgs.length+(msgs.length===1?' message':' messages')+' seen';
+  $('#ul').innerHTML=list.length?list.map(x=>`<div><time>${new Date(x.t).toLocaleTimeString('tr-TR')}</time><span>${emo(x.m)}</span></div>`).join(''):'<div class="dim">No messages seen from this user since this page connected.</div>';
+  const mb=$('#uMode');mb.hidden=msgs.length<=10;mb.textContent=uAll?'Show last 10':'Show all '+msgs.length;
+  if(!$('#udlg').open)$('#udlg').showModal();
+  const ul=$('#ul');ul.scrollTop=ul.scrollHeight;
+}
+function onChat(user,msg,demo){
+  record(user,msg,demo);
   const kw=lc((S.kw||'').trim()),hit=kw&&lc(msg.trim())===kw;
   if(hit&&!S.paused&&user&&!exSet.has(lc(user))&&!keys.has(lc(user))){keys.add(lc(user));S.entries.push(user);save();render()}
   if(live().length&&!won().has(lc(user)))return;
   const c=$('#chat');
   if(c.querySelector('.empty'))c.innerHTML='';
-  c.insertAdjacentHTML('beforeend',`<div class="${hit&&!live().length?'hit':''}"><b>${esc(user)}</b> ${emo(msg)}</div>`);
+  c.insertAdjacentHTML('beforeend',`<div class="${hit&&!live().length?'hit':''}"><b role="button" tabindex="0" data-u="${esc(user)}">${esc(user)}</b> ${emo(msg)}</div>`);
   while(c.children.length>120)c.removeChild(c.firstChild);
   c.scrollTop=c.scrollHeight;
 }
@@ -486,7 +551,7 @@ function stopDemo(){clearInterval(demoT);demoT=null;$('#demo').textContent='Demo
 function toggleDemo(){
   if(demoT)return stopDemo();
   $('#demo').textContent='Stop demo';
-  demoT=setInterval(()=>{const talk=[S.kw,S.kw,S.kw,'hi','gg','good luck'];onChat(fake[Math.floor(Math.random()*fake.length)]+Math.floor(Math.random()*60),talk[Math.floor(Math.random()*talk.length)])},350);
+  demoT=setInterval(()=>{const talk=[S.kw,S.kw,S.kw,'hi','gg','good luck'];onChat(fake[Math.floor(Math.random()*fake.length)]+Math.floor(Math.random()*60),talk[Math.floor(Math.random()*talk.length)],true)},350);
   render();
 }
 
@@ -504,8 +569,10 @@ $('#entries').onclick=e=>{
   if(confirm('Remove '+n+' from the raffle? They will not be able to rejoin this round.')){S.removed.push(n);save();render()}
 };
 $('#winList').onclick=e=>{
+  const un=e.target.closest('.un');if(un){showUser(un.dataset.u,true);return}
   const b=e.target.closest('.x');if(!b||spinning)return;
   const w=S.winners[+b.dataset.i];if(!w)return;
+  if(b.classList.contains('del')){if(confirm('Remove '+w.n+' from the winners? They can be drawn again.')){w.void=true;doSave();idle();chatEmpty();render()}return}
   if(confirm('Disqualify '+w.n+' and draw the next winner?')){w.void=true;S.removed.push(w.n);doSave();idle();chatEmpty();render();pick()}
 };
 $('#wcopy').onclick=async()=>{try{await navigator.clipboard.writeText(live().map((w,i)=>`${i+1}. ${w.n}${w.prize?' - '+w.prize:''}`).join('\n'));$('#wcopy').textContent='Copied';setTimeout(()=>$('#wcopy').textContent='Copy',1200)}catch(e){}};
@@ -521,6 +588,12 @@ $('#showEligible')?.addEventListener('click',e=>{
   b.textContent=b.dataset.only==='1'?'All entries':'Eligible';
   b.classList.toggle('off',b.dataset.only==='1');render();
 });
+$('#chat').addEventListener('click',e=>{const b=e.target.closest('b[data-u]');if(b)showUser(b.dataset.u,true)});
+document.addEventListener('keydown',e=>{if(e.key!=='Enter'&&e.key!==' ')return;const b=e.target.closest&&e.target.closest('b[data-u],.un');if(b){e.preventDefault();showUser(b.dataset.u,true)}});
+$('#uMode').onclick=()=>{uAll=!uAll;showUser(uOpen)};
+$('#udlg').addEventListener('close',()=>{uOpen=null});
+addEventListener('beforeunload',()=>{try{localStorage.setItem(LOGKEY,JSON.stringify(LOG.filter(x=>!x.d)))}catch(e){}});
+$('#yr').textContent=new Date().getFullYear();
 $('#conn').onclick=toggleConn;$('#demo').onclick=toggleDemo;$('#cclear').onclick=()=>chatEmpty();$('#pick').onclick=pick;$('#proofBtn').onclick=proof;
 $('#pause').onclick=()=>{S.paused=!S.paused;save();render()};
 $('#reset').onclick=()=>{if(confirm('Clear all entries and winners and start a new round?'))newRound(true)};
