@@ -21,6 +21,7 @@ PUSHER_URL = os.environ.get("PUSHER_URL") or (
 CHAT_EVENTS = {"App\\Events\\ChatMessageEvent", "App\\Events\\ChatMessageSentEvent"}
 HERE = pathlib.Path(__file__).parent
 rooms = {}  # chatroom id -> {"clients": set, "task": Task, "state": dict}
+presence = set()  # open page tabs, for the live "online" counter
 
 
 def fetch_json(url):
@@ -175,6 +176,26 @@ async def ws_handler(request):
     return ws
 
 
+async def push_online():
+    text = json.dumps({"type": "online", "n": len(presence)})
+    await asyncio.gather(*(send_safe(c, text) for c in list(presence)))
+
+
+async def presence_handler(request):
+    ws = web.WebSocketResponse(heartbeat=30)
+    await ws.prepare(request)
+    presence.add(ws)
+    await push_online()
+    try:
+        async for msg in ws:
+            if msg.type == aiohttp.WSMsgType.TEXT:
+                await ws.send_json({"type": "pong"})
+    finally:
+        presence.discard(ws)
+        await push_online()
+    return ws
+
+
 async def index(request):
     for name in ("index.html", "cekilis.html"):
         f = HERE / name
@@ -184,7 +205,7 @@ async def index(request):
 
 
 app = web.Application()
-app.add_routes([web.get("/", index), web.get("/ws", ws_handler)])
+app.add_routes([web.get("/", index), web.get("/ws", ws_handler), web.get("/presence", presence_handler)])
 
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 8080))
