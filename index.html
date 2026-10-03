@@ -326,7 +326,7 @@ pre{font:11px/1.65 var(--mono);white-space:pre-wrap;word-break:break-all;max-hei
     </section>
     <div class="row"><button class="btn" id="pick">PICK WINNER</button><button class="btn" id="reset" title="Clear entries and winners, start a new round">RESET</button></div>
     <section class="card" id="wins" hidden>
-      <div class="head"><h2>Winners</h2><div class="tools"><button class="btn sm" id="wcopy">Copy</button><button class="btn sm" id="wcsv">CSV</button></div></div><div class="chips" id="winList"></div>
+      <div class="head"><h2>Winners</h2><div class="tools"><button class="btn sm" id="wcopy">Copy</button><button class="btn sm" id="wcsv">CSV</button><button class="btn sm" id="wclear" title="Remove all winners (entries stay)">Clear winners</button></div></div><div class="chips" id="winList"></div>
     </section>
     <section class="card">
       <div class="head"><h2>Entries</h2><div class="tools"><button class="btn sm" id="pause">Pause</button><button class="btn sm" id="copy">Copy</button><span class="badge b-red" id="live">OFFLINE</span></div></div>
@@ -401,7 +401,7 @@ function paint(){
   $('#pick').disabled=spinning||!el.length;$('#pick').textContent=spinning?'DRAWING…':'PICK WINNER';
   $('#entries').innerHTML=shown.length?shown.map(n=>`<span class="chip${w.has(lc(n))?' w':out(n)?' r':''}" data-n="${esc(n)}">${esc(n)}</span>`).join('')+(S.entries.length>600?`<span class="dim">+${S.entries.length-600} more</span>`:''):'<span class="dim">No entries yet.</span>';
   $('#wins').hidden=!live().length;$('#mode').hidden=!live().length;
-  $('#winList').innerHTML=S.winners.map((x,i)=>x.void?'':`<span class="chip w"><span class="un" role="button" tabindex="0" data-u="${esc(x.n)}">${esc(x.n)}</span><button class="x del" data-i="${i}" title="Remove this winner (they can be drawn again)" aria-label="Remove winner ${esc(x.n)}"><svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 7h16M10 11v6M14 11v6M5 7l1 12a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2l1-12M9 7V4h6v3"/></svg></button><button class="x" data-i="${i}" title="Disqualify and draw the next winner" aria-label="Disqualify ${esc(x.n)}">✕</button></span>`).join('');
+  $('#winList').innerHTML=S.winners.map((x,i)=>x.void?'':`<span class="chip w"><span class="un" role="button" tabindex="0" data-u="${esc(x.n)}">${esc(x.n)}</span><button class="x" data-i="${i}" title="Disqualify and draw the next winner" aria-label="Disqualify ${esc(x.n)}">✕</button></span>`).join('');
   const on=conn==='connected'||demoT,lb=$('#live');
   lb.className='badge '+(S.paused?'b-y':on?'b-g':'b-red');lb.textContent=S.paused?'PAUSED':on?'LIVE':'OFFLINE';
   $('#pause').textContent=S.paused?'Resume':'Pause';
@@ -568,11 +568,11 @@ $('#entries').onclick=e=>{
   const n=c.dataset.n;if(won().has(lc(n))||out(n))return;
   if(confirm('Remove '+n+' from the raffle? They will not be able to rejoin this round.')){S.removed.push(n);save();render()}
 };
+$('#wclear').onclick=()=>{if(spinning||!live().length)return;if(confirm('Remove all winners? Entries stay and everyone can be drawn again.')){S.winners.forEach(w=>{w.void=true});doSave();idle();chatEmpty();render()}};
 $('#winList').onclick=e=>{
   const un=e.target.closest('.un');if(un){showUser(un.dataset.u,true);return}
   const b=e.target.closest('.x');if(!b||spinning)return;
   const w=S.winners[+b.dataset.i];if(!w)return;
-  if(b.classList.contains('del')){if(confirm('Remove '+w.n+' from the winners? They can be drawn again.')){w.void=true;doSave();idle();chatEmpty();render()}return}
   if(confirm('Disqualify '+w.n+' and draw the next winner?')){w.void=true;S.removed.push(w.n);doSave();idle();chatEmpty();render();pick()}
 };
 $('#wcopy').onclick=async()=>{try{await navigator.clipboard.writeText(live().map((w,i)=>`${i+1}. ${w.n}${w.prize?' - '+w.prize:''}`).join('\n'));$('#wcopy').textContent='Copied';setTimeout(()=>$('#wcopy').textContent='Copy',1200)}catch(e){}};
